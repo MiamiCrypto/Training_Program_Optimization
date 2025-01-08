@@ -5,7 +5,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 import requests
 from io import BytesIO
-import matplotlib.pyplot as plt
 import plotly.express as px
 from fpdf import FPDF
 
