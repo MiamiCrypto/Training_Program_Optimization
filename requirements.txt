@@ -4,3 +4,5 @@ scikit-learn
 requests
 openpyxl
 streamlit
+plotly
+fpdf
