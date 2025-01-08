@@ -48,6 +48,9 @@ def main():
     kmeans = KMeans(n_clusters=3, random_state=42)
     kmeans.fit(scaled_features)
 
+    # Predict clusters and assign to DataFrame
+    df['cluster'] = kmeans.predict(scaled_features)
+
     # Predict cluster for new data
     scaled_input = scaler.transform(input_data[features])
     cluster = kmeans.predict(scaled_input)[0]
