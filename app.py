@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 import requests
 from io import BytesIO
 import plotly.express as px
@@ -47,9 +48,10 @@ def main():
     # Apply K-Means Clustering
     kmeans = KMeans(n_clusters=3, random_state=42)
     kmeans.fit(scaled_features)
-
-    # Predict clusters and assign to DataFrame
     df['cluster'] = kmeans.predict(scaled_features)
+
+    # Calculate silhouette score
+    silhouette_avg = silhouette_score(scaled_features, df['cluster'])
 
     # Predict cluster for new data
     scaled_input = scaler.transform(input_data[features])
@@ -68,6 +70,10 @@ def main():
     else:
         st.write("Balance intensity workouts with adequate recovery time.")
 
+    # Display silhouette score
+    st.subheader("Cluster Quality (Silhouette Score)")
+    st.write(f"The silhouette score for the current clustering is {silhouette_avg:.2f}. A higher score indicates better-defined clusters.")
+
     # Cluster insights section
     st.subheader("Cluster Insights")
     cluster_summary = df.groupby('cluster').mean()[features]
@@ -75,10 +81,16 @@ def main():
 
     # Data visualization
     st.subheader("Cluster Visualization")
-    fig = px.scatter(df, x='workout_load', y='performance_improvement', color=df['cluster'].astype(str),
-                     title="Workout Load vs Performance Improvement by Cluster",
-                     labels={"cluster": "Cluster"})
-    st.plotly_chart(fig)
+    fig1 = px.scatter(df, x='workout_load', y='performance_improvement', color=df['cluster'].astype(str),
+                      title="Workout Load vs Performance Improvement by Cluster",
+                      labels={"cluster": "Cluster"})
+    st.plotly_chart(fig1)
+
+    # Additional scatter plot for fatigue index vs recovery time
+    fig2 = px.scatter(df, x='fatigue_index', y='recovery_time', color=df['cluster'].astype(str),
+                      title="Fatigue Index vs Recovery Time by Cluster",
+                      labels={"cluster": "Cluster"})
+    st.plotly_chart(fig2)
 
     # Downloadable PDF report
     st.subheader("Download Report")
