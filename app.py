@@ -112,9 +112,9 @@ def main():
             pdf.cell(200, 10, txt="Suggested Training Program: Emphasize strength training and muscle recovery.", ln=True)
         else:
             pdf.cell(200, 10, txt="Suggested Training Program: Balance intensity workouts with adequate recovery time.", ln=True)
-        pdf_output = BytesIO()
-        pdf.output(pdf_output)
-        pdf_output.seek(0)
+
+        # Generate PDF as bytes
+        pdf_output = pdf.output(dest='S').encode('latin1')
         st.download_button(label="Download PDF", data=pdf_output, file_name="training_program_report.pdf", mime="application/pdf")
 
     # File upload for new dataset
