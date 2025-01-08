@@ -5,6 +5,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 import requests
 from io import BytesIO
+import matplotlib.pyplot as plt
+import plotly.express as px
+from fpdf import FPDF
 
 # Load the dataset from GitHub raw URL
 url = "https://github.com/MiamiCrypto/Training_Program_Optimization/raw/refs/heads/master/athlete_data_5000.xlsx"
@@ -62,6 +65,55 @@ def main():
         st.write("Emphasize strength training and muscle recovery.")
     else:
         st.write("Balance intensity workouts with adequate recovery time.")
+
+    # Cluster insights section
+    st.subheader("Cluster Insights")
+    cluster_summary = df.groupby('cluster').mean()[features]
+    st.write(cluster_summary)
+
+    # Data visualization
+    st.subheader("Cluster Visualization")
+    fig = px.scatter(df, x='workout_load', y='performance_improvement', color=df['cluster'].astype(str),
+                     title="Workout Load vs Performance Improvement by Cluster",
+                     labels={"cluster": "Cluster"})
+    st.plotly_chart(fig)
+
+    # Downloadable PDF report
+    st.subheader("Download Report")
+    if st.button("Generate PDF Report"):
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.cell(200, 10, txt="AI-Based Training Program Optimization Report", ln=True, align='C')
+        pdf.ln(10)
+        pdf.cell(200, 10, txt=f"Age: {age}", ln=True)
+        pdf.cell(200, 10, txt=f"Workout Load: {workout_load}", ln=True)
+        pdf.cell(200, 10, txt=f"Fatigue Index: {fatigue_index}", ln=True)
+        pdf.cell(200, 10, txt=f"Recovery Time: {recovery_time}", ln=True)
+        pdf.cell(200, 10, txt=f"Performance Improvement: {performance_improvement}", ln=True)
+        pdf.cell(200, 10, txt=f"Predicted Cluster: {cluster}", ln=True)
+        if cluster == 0:
+            pdf.cell(200, 10, txt="Suggested Training Program: Focus on endurance and stamina-building exercises.", ln=True)
+        elif cluster == 1:
+            pdf.cell(200, 10, txt="Suggested Training Program: Emphasize strength training and muscle recovery.", ln=True)
+        else:
+            pdf.cell(200, 10, txt="Suggested Training Program: Balance intensity workouts with adequate recovery time.", ln=True)
+        pdf_output = BytesIO()
+        pdf.output(pdf_output)
+        pdf_output.seek(0)
+        st.download_button(label="Download PDF", data=pdf_output, file_name="training_program_report.pdf", mime="application/pdf")
+
+    # File upload for new dataset
+    st.subheader("Upload New Athlete Dataset")
+    uploaded_file = st.file_uploader("Upload an Excel file", type=["xlsx"])
+    if uploaded_file is not None:
+        new_df = pd.read_excel(uploaded_file)
+        st.write("Uploaded Dataset:")
+        st.dataframe(new_df.head())
+        new_scaled_features = scaler.transform(new_df[features])
+        new_df['cluster'] = kmeans.predict(new_scaled_features)
+        st.write("Clustered Dataset:")
+        st.dataframe(new_df)
 
 if __name__ == "__main__":
     main()
